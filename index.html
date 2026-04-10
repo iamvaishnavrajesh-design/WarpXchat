@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GamerChat</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0d0d0f;
+      color: #e0e0e0;
+      height: 100vh;
+      display: flex;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 260px;
+      background: #111114;
+      border-right: 1px solid #1e1e24;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 20px 16px;
+      border-bottom: 1px solid #1e1e24;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }SSSSSSSS
+
+    .sidebar-header .logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #7c3aed, #06b6d4);
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+    }
+
+    .sidebar-header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #a78bfa, #22d3ee);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-scroll {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+    .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: #2a2a32; border-radius: 2px; }
+
+    .section-label {
+      padding: 16px 16px 8px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #555;
+      font-weight: 600;
+    }
+
+    .channel-list {
+      list-style: none;
+    }
+
+    .channel-list li {
+      padding: 10px 16px;
+      cursor: pointer;
+      border-radius: 8px;
+      margin: 2px 8px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background .15s;
+    }
+
+    .channel-list li:hover { background: #1a1a20; }
+    .channel-list li.active { background: #7c3aed22; color: #a78bfa; }
+
+    .channel-list li .hash { color: #555; font-weight: 700; }
+
+    /* ── DM List ── */
+    .dm-list { list-style: none; }
+
+    .dm-list li {
+      padding: 8px 16px;
+      cursor: pointer;
+      border-radius: 8px;
+      margin: 2px 8px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background .15s;
+    }
+
+    .dm-list li:hover { background: #1a1a20; }
+    .dm-list li.active { background: #7c3aed22; color: #a78bfa; }
+
+    .dm-list li .dm-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: grid; place-items: center;
+      font-size: 12px; font-weight: 600; flex-shrink: 0;
+    }
+
+    .dm-list li .dm-name { flex: 1; }
+
+    .dm-list li .dm-badge {
+      background: #7c3aed; color: #fff; font-size: 10px; font-weight: 700;
+      padding: 2px 6px; border-radius: 10px; display: none;
+    }
+
+    .dm-list li .dm-badge.show { display: inline; }
+
+    .online-section {
+      border-top: 1px solid #1e1e24;
+      padding: 12px 16px;
+    }
+
+    .online-section h3 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #555;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .online-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 4px;
+      font-size: 13px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background .15s;
+    }
+
+    .online-user:hover { background: #1a1a20; }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .dm-hint {
+      font-size: 10px;
+      color: #7c3aed;
+      margin-left: auto;
+      opacity: 0;
+      transition: opacity .15s;
+    }
+
+    .online-user:hover .dm-hint { opacity: 1; }
+
+    /* ── Main Chat ── */
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid #1e1e24;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #111114;
+    }
+
+    .chat-header .header-icon { color: #555; font-size: 20px; font-weight: 700; }
+    .chat-header .channel-name { font-weight: 600; font-size: 16px; }
+    .chat-header .channel-desc { color: #666; font-size: 13px; margin-left: 12px; }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .messages::-webkit-scrollbar { width: 6px; }
+    .messages::-webkit-scrollbar-track { background: transparent; }
+    .messages::-webkit-scrollbar-thumb { background: #2a2a32; border-radius: 3px; }
+
+    .msg-group {
+      display: flex;
+      gap: 12px;
+      padding: 8px 0;
+    }
+
+    .msg-group:hover { background: #ffffff05; margin: 0 -24px; padding: 8px 24px; border-radius: 4px; }
+
+    .msg-info .username {
+      font-weight: 600;
+      font-size: 14px;
+      color: #a78bfa;
+    }
+
+    .msg-info .timestamp {
+      font-size: 11px;
+      color: #555;
+      margin-left: 8px;
+    }
+
+    .msg-info .text {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #ccc;
+      margin-top: 2px;
+    }
+
+    .msg-info .bot-tag {
+      font-size: 9px;
+      background: #7c3aed;
+      color: #fff;
+      padding: 1px 5px;
+      border-radius: 4px;
+      margin-left: 6px;
+      font-weight: 700;
+      vertical-align: middle;
+    }
+
+    /* ── Chat Input ── */
+    .chat-input-area {
+      padding: 16px 24px 20px;
+      background: #0d0d0f;
+      position: relative;
+    }
+
+    .chat-input-wrapper {
+      background: #18181d;
+      border: 1px solid #2a2a32;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      padding: 4px 8px;
+      transition: border-color .2s;
+    }
+
+    .chat-input-wrapper:focus-within { border-color: #7c3aed; }
+
+    .chat-input-wrapper button.emoji-btn {
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 8px;
+      transition: color .15s;
+    }
+
+    .chat-input-wrapper button.emoji-btn:hover { color: #a78bfa; }
+
+    #messageInput {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #e0e0e0;
+      font-size: 14px;
+      font-family: inherit;
+      padding: 10px 8px;
+    }
+
+    #messageInput::placeholder { color: #555; }
+
+    .chat-input-wrapper button.send-btn {
+      background: linear-gradient(135deg, #7c3aed, #06b6d4);
+      border: none;
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      transition: opacity .15s;
+    }
+
+    .chat-input-wrapper button.send-btn:hover { opacity: .85; }
+
+    /* ── Username Modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.7);
+      backdrop-filter: blur(8px);
+      display: grid;
+      place-items: center;
+      z-index: 100;
+    }
+
+    .modal-overlay.hidden { display: none; }
+
+    .modal {
+      background: #18181d;
+      border: 1px solid #2a2a32;
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      width: 360px;
+    }
+
+    .modal h2 {
+      font-size: 22px;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, #a78bfa, #22d3ee);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .modal p { color: #666; font-size: 13px; margin-bottom: 24px; }
+
+    .modal input {
+      width: 100%;
+      padding: 12px 16px;
+      background: #0d0d0f;
+      border: 1px solid #2a2a32;
+      border-radius: 10px;
+      color: #e0e0e0;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      margin-bottom: 16px;
+      transition: border-color .2s;
+    }
+
+    .modal input:focus { border-color: #7c3aed; }
+
+    .modal button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #7c3aed, #06b6d4);
+      border: none;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity .15s;
+    }
+
+    .modal button:hover { opacity: .85; }
+
+    /* ── Typing Indicator ── */
+    .typing-indicator {
+      padding: 0 24px 4px;
+      font-size: 12px;
+      color: #a78bfa;
+      height: 20px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Username Modal -->
+  <div class="modal-overlay" id="usernameModal">
+    <div class="modal">
+      <h2>⚔️ GamerChat</h2>
+      <p>Choose your gamertag to enter the arena</p>
+      <input type="text" id="usernameInput" placeholder="Enter gamertag..." maxlength="20" autocomplete="off">
+      <button id="joinBtn">Join Chat</button>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">⚔️</div>
+      <h1>GamerChat</h1>
+    </div>
+    <div class="sidebar-scroll">
+      <div class="section-label">Channels</div>
+      <ul class="channel-list" id="channelList">
+        <li class="active" data-channel="general"><span class="hash">#</span> general</li>
+        <li data-channel="valorant"><span class="hash">#</span> valorant</li>
+        <li data-channel="minecraft"><span class="hash">#</span> minecraft</li>
+        <li data-channel="fortnite"><span class="hash">#</span> fortnite</li>
+        <li data-channel="lfg-party"><span class="hash">#</span> lfg-party</li>
+        <li data-channel="clips-highlights"><span class="hash">#</span> clips-highlights</li>
+      </ul>
+
+      <div class="section-label">Direct Messages</div>
+      <ul class="dm-list" id="dmList"></ul>
+
+      <div class="online-section">
+        <h3>Online — <span id="onlineCount">0</span></h3>
+        <div id="onlineUsers"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Chat -->
+  <main class="chat-area">
+    <div class="chat-header">
+      <span class="header-icon" id="headerIcon">#</span>
+      <span class="channel-name" id="currentChannel">general</span>
+      <span class="channel-desc" id="channelDesc">Talk about anything gaming</span>
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+    <div class="typing-indicator" id="typingIndicator"></div>
+
+    <div class="chat-input-area">
+      <div class="chat-input-wrapper">
+        <button class="emoji-btn" id="emojiBtn" title="Emoji">😊</button>
+        <input type="text" id="messageInput" placeholder="Message #general" maxlength="500" autocomplete="off">
+        <button class="send-btn" id="sendBtn" title="Send">➤</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // ── Bot Personalities (30 bots) ──
+    const bots = {
+      ShadowBlade: { responses: {
+        general: ["Anyone up for ranked? 5 win streak 🔥","Bro that update buffed my main","GG's to whoever clutched that 🫡","Aim assist is broken rn","Just hit Diamond, no sleep gang 💀","Who's streaming tonight?"],
+        valorant: ["Jett diff tbh","Omen is underrated rn","Just aced on Ascent 🎯","Reyna mains are different fr","What's your crosshair code?"],
+        minecraft: ["Hardcore mode only, survival is too easy","Lost my 200 day world to a creeper 💀"],
+        fortnite: ["Building is the skill gap, no cap","Zero build is lowkey fun ngl"],
+        fallback: ["Facts 💯","That's wild lol","Yeah I feel that","Let's goooo 🔥","No way 😂","W take","Couldn't agree more","Kinda sus ngl","Based opinion","For real? 👀"]
+      }},
+      NeonSnipe: { responses: {
+        general: ["Just finished a mega base, 3 days 🏗️","Vibes are immaculate tonight ✨","Who wants to collab?","PvP players don't get building","Music recs while gaming? 🎵","Sick timelapse of my build!"],
+        minecraft: ["Redstone engineers are real gamers","Double spawner near my base 🎰","Shaders make everything 10x better","Join my survival SMP?","What texture pack y'all using?"],
+        fortnite: ["Creative mode is the best thing Epic added","I build maps not loadouts 🗺️"],
+        valorant: ["I just play unrated for fun","Killjoy turret carry >>>"],
+        fallback: ["That's so cool! 🤩","Love that energy","Big W 🏆","Yooo nice!","Honestly same","Community is goated fr","I respect it 🙌","Super chill","That's the way ✨"]
+      }},
+      PixelWitch: { responses: {
+        general: ["Anyone 100%'d Elden Ring? I'm at 97% 😵","Story mode > multiplayer fight me","Found a secret easter egg 👀","Lore-wise that makes no sense","Side quests > main quests","My gallery is FULL of cutscenes 📸"],
+        minecraft: ["The End lore is deep","Ancient cities are terrifying 💀"],
+        valorant: ["I only play for lore cinematics","Valorant lore is actually insane"],
+        fortnite: ["Storyline is underrated, live events go hard","I want more story quests"],
+        fallback: ["Interesting take 🤔","That's lore-accurate 📖","I can see that","Valid, very valid","Lore implications tho 😤","10/10 opinion","L take but respect","Main character energy","The plot thickens 👀"]
+      }},
+      ToxicRage: { responses: {
+        general: ["Bro I'm literally unbeatable rn 😤","My team is holding me back AGAIN","Skill issue tbh","I don't lose, my team does","Get good or go home","Ranked is a joke this season"],
+        valorant: ["Instalock Jett every time, no regrets","My KD is higher than your rank","If you're not top fragging don't talk"],
+        fortnite: ["1v1 me bro, you won't last 10 seconds","I'd clap your whole squad solo"],
+        minecraft: ["PvP gods don't build, they conquer","Crystal PvP is the real skill check"],
+        fallback: ["Literally malding rn","That's so trash 😤","You're trolling right?","Stop throwing omg","Cope harder","Diff diff diff","Ratio","Hard stuck moment","L + bozo","Gg ez"]
+      }},
+      ZenMaster: { responses: {
+        general: ["Remember to stretch between games 🧘","Gaming is about fun, not just winning","Hydrate before you dominate 💧","Take breaks, your eyes will thank you","Positive vibes only in this lobby ✨","We're all here to have a good time"],
+        valorant: ["Win or lose, the experience matters","Comms and teamwork over aim any day","Toxic teammates need hugs not reports"],
+        minecraft: ["Peaceful mode is therapeutic honestly","Just watching the sunset in-game... bliss 🌅"],
+        fortnite: ["No build, no stress, just vibes","The scenery in this game is underrated"],
+        fallback: ["Breathe, reset, go again 🧘","That's a healthy take","I appreciate you","Kindness is OP","Stay positive friend ✨","Good energy here","Wholesome take","Respect 🙏","Love this community","Keep it up 💛"]
+      }},
+      GlitchHex: { responses: {
+        general: ["Just found a new exploit, should I share? 👀","Speedrunning is the real endgame","I clip through walls for fun","Bug hunting is my favorite game mode","The devs DON'T want you to know this","Patched? Nah I found the workaround"],
+        minecraft: ["Duplication glitch still works btw","Bedrock breaking is an art form","I can get below the void 💀"],
+        valorant: ["Cypher camera spots the devs missed","There's a pixel walk on Breeze nobody uses"],
+        fortnite: ["Found a spot under the map again","Glitch building is unironically fun"],
+        fallback: ["That's a feature not a bug","Exploit early exploit often","Interesting... very interesting","The code never lies","404 skill not found 😂","It's not cheating it's creativity","Technically legal","Hmm let me test that","Breaking boundaries literally","*takes notes* 📝"]
+      }},
+      LootGoblin: { responses: {
+        general: ["First thing I do is loot everything 🎒","My inventory is always full","I collect items I'll never use","Hoarding is a lifestyle","Sell nothing, keep everything","Trading? Nah I'm keeping my stuff"],
+        minecraft: ["My chest room has 200 chests 📦","I sorted my storage for 6 hours","Shulker boxes changed my life","I have 10 stacks of diamonds, what now?"],
+        fortnite: ["I loot the whole POI before fighting","Who needs weapons when you have MATS"],
+        valorant: ["I buy every round, eco is boring","Full buy every round no regrets"],
+        fallback: ["Ooh shiny! 🤩","*picks that up*","Adding to the collection","Mine now","Finders keepers","Is that rare?","I NEED that","My precious...","One more won't hurt","Inventory management is the real game"]
+      }},
+      NoobSlayer: { responses: {
+        general: ["Imagine dying in a video game 💀","I haven't lost since last Tuesday","Carry me? No, I carry YOU","Ranked grind never stops","Sleep is for people who lose","My stats speak for themselves 📊"],
+        valorant: ["Immortal is too easy, need a higher rank","Acing should give bonus RR","My spray control is immaculate"],
+        fortnite: ["99 bots in the lobby and I'm not one of them","Victory royale is the only option"],
+        minecraft: ["Beat the Ender Dragon blindfolded","Hardcore day 1000, still alive 😎"],
+        fallback: ["Too easy","Not even close","Skill gap is massive","Diff","Destroyed","Was that supposed to be hard?","GG EZ no RE","Next challenge please","Yawn 🥱","That was practice btw"]
+      }},
+      RetroGamer: { responses: {
+        general: ["Games were better in the PS2 era, just saying","Remember split-screen multiplayer? Those were the days","Modern games are too easy","I still play my GameBoy 🕹️","They don't make games like they used to","Cheat codes > microtransactions"],
+        minecraft: ["Been playing since alpha, I'm basically ancient","Remember when Minecraft was $10?"],
+        valorant: ["CS 1.6 was the real tac shooter","This generation doesn't know about LAN parties"],
+        fortnite: ["Season 1 was the golden age","OG Fortnite hits different"],
+        fallback: ["Back in my day...","OK but have you played the original?","Classic 🕹️","That's giving nostalgia","Old school vibes","They don't know 😤","Retro > modern","Remember when games were complete at launch?","The good old days","Respect the classics"]
+      }},
+      StreamQueen: { responses: {
+        general: ["Going live in 5! Drop by 📺","Just hit 1K followers!!","Chat is popping tonight","Emote-only mode hits different","My overlay setup is *chef's kiss*","The grind for partner is real 😤"],
+        valorant: ["Streaming ranked is so stressful","Chat backseat gaming every round 😭"],
+        fortnite: ["Stream snipers are a PLAGUE","My chat just predicted the win"],
+        minecraft: ["Building on stream is so therapeutic","Chat designed my house and it's cursed 😂"],
+        fallback: ["Follow for follow? 😂","Content incoming","That's clip-worthy","Going in the highlights reel","Chat would love this","Subscribe btw","POG moment","Content gold right here","My chat is gonna flip","Stream highlight for sure 📺"]
+      }},
+      MidnightWolf: { responses: {
+        general: ["It's 3am and I can't stop playing 🌙","Late night gaming hits different","Who else is up right now?","The night crew is the best crew","Sleep schedule? Don't know her","One more game... said 4 hours ago"],
+        valorant: ["3am ranked is a different beast","Late night lobbies are either cracked or terrible"],
+        minecraft: ["Nighttime mining sessions are elite","The cave sounds at 3am hit different 💀"],
+        fortnite: ["Late night solos are peaceful","The map at night is beautiful"],
+        fallback: ["*yawns* one more game","Sleep is overrated","Night owl gang 🦉","Who needs sleep","3am thoughts go crazy","The moon is my gaming light 🌙","Insomnia gaming","Still here lol","Eyes are burning but we go","Nocturnal gamer vibes"]
+      }},
+      ArcadeKing: { responses: {
+        general: ["High score or no score 👑","Quarter-muncher mentality","I grew up in arcades","Fighting games are peak gaming","Combo breaker!!","Leaderboard grind is the only grind"],
+        valorant: ["Aim trainers are just modern arcades","My reaction time is arcade-trained"],
+        minecraft: ["Trying to speedrun my PB","Timer starts NOW"],
+        fortnite: ["Solo wins leaderboard is all that matters","KD tracking is my obsession"],
+        fallback: ["New high score! 🏆","Beat that!","Leaderboard goes crazy","Score attack mode","Combo! 🔥","Perfect run","No continues needed","Insert coin to continue","Game over? Never","Top of the board 👑"]
+      }},
+      CraftMaster: { responses: {
+        general: ["Just spent 12 hours on a build, worth it","Crafting systems are underrated","I plan builds in a spreadsheet 📋","Efficiency is everything","Resource management is my thing","Optimization is the real fun"],
+        minecraft: ["My automatic farm produces 10K items/hr","Iron farm is finally done!","Villager trading hall complete 🏪","My sorted storage took 3 weeks","Efficiency V on everything"],
+        fortnite: ["Weapon crafting was the best season mechanic","I know every crafting recipe"],
+        valorant: ["My util usage is crafted to perfection","Economy management is underrated"],
+        fallback: ["Crafted to perfection ⚒️","That's efficient","Optimized 💪","Resource management!","Calculated","Well-built","Engineered perfectly","The grind pays off","Efficiency gang","Blueprint ready 📐"]
+      }},
+      PhantomDrift: { responses: {
+        general: ["Racing games are so underrated 🏎️","Drifting is an art form","Need for Speed was my childhood","I only play with a wheel setup","Sim racing > arcade racing","Track day every day"],
+        minecraft: ["Boat racing in Minecraft is goated","Ice boat tracks are insane"],
+        fortnite: ["Vehicle meta was peak Fortnite","Driving across the map is therapeutic"],
+        valorant: ["I play Jett for the movement, not the aim","Movement is the most important skill"],
+        fallback: ["Speed is key 🏎️","Gotta go fast","Full throttle","No brakes","Drifting through life","Turbo mode activated","Lap record!","In the fast lane","Zooming","Vroom vroom 🏁"]
+      }},
+      CosmicAce: { responses: {
+        general: ["Space games are elite 🚀","Played 2000 hours of Elite Dangerous","The universe is my playground","Sci-fi > fantasy, change my mind","Just discovered a new planet (in game)","Interstellar soundtrack while gaming 🎶"],
+        minecraft: ["The End dimension is basically space","Elytra flying is the closest to space travel"],
+        valorant: ["Astra is the most galaxy-brain agent","Playing 4D chess with my util"],
+        fortnite: ["That space-themed season was incredible","Meteor events are the best"],
+        fallback: ["To infinity and beyond 🚀","Astronomical","Out of this world","Space vibes","Galaxy brain take","Stellar opinion","Cosmic energy","Light years ahead","Universal truth","Orbit achieved 🌌"]
+      }},
+      BerserkerX: { responses: {
+        general: ["RUSH RUSH RUSH no strategy needed 💥","I don't plan, I just attack","Aggression wins every time","Who needs defense when you have OFFENSE","Full send always","Patience? Never heard of it"],
+        valorant: ["W-key every round, entries only","Duelist or dodge, simple","Flashes? I AM the flash"],
+        fortnite: ["Land hot drop or don't land at all","I push every fight no questions"],
+        minecraft: ["I rush the Ender Dragon day one","No armor needed, skill is my armor"],
+        fallback: ["CHARGE!! ⚔️","Full send!","No retreat!","Attack attack attack","Aggro mode ON","Let's GO","PUSH!","Fearless gaming","No hesitation","All offense no defense 💥"]
+      }},
+      SilentStrike: { responses: {
+        general: ["Stealth games are the real skill test 🥷","Patience is my weapon","I clear the whole map without being seen","Ghost runs or nothing","Hitman is a masterpiece","Silent but deadly approach"],
+        valorant: ["Flank plays are my specialty","They never hear me coming","Lurking is an art form"],
+        minecraft: ["Invisibility potions are underrated","I sneak past every mob"],
+        fortnite: ["Bush camping is a valid strategy","Suppressed weapons are elite"],
+        fallback: ["...","*disappears*","Stealth mode 🥷","You didn't see me","Silent but deadly","Moving in shadows","Ghost protocol","Undetected","Like a phantom","Ninja vibes"]
+      }},
+      QueenBee: { responses: {
+        general: ["I run this lobby 👑","Leadership is a skill too","Squad captain energy","I make the callouts here","Follow my lead and we win","Team coordination is everything"],
+        valorant: ["IGL diff honestly","My strats are undefeated","Comms are the secret weapon"],
+        fortnite: ["I'm the shot caller in squads","My team trusts my rotations"],
+        minecraft: ["I manage the entire server","My SMP has rules and I enforce them"],
+        fallback: ["That's the spirit 👑","Teamwork makes the dream work","I approve","Under my command","Solid plan","Let's coordinate","Rally up!","Formation!","Copy that","Moving as a unit 🐝"]
+      }},
+      ChaosAgent: { responses: {
+        general: ["I play games just to troll 😈","Friendly fire should be in every game","My fun is your chaos","Unpredictable is my playstyle","I choose violence","Random is my strategy"],
+        minecraft: ["I place TNT in people's bases 💣","Creeper farm next to spawn, you're welcome","Lava bucket above the door, classic"],
+        valorant: ["Molly my own team for fun","Flashing my teammates is hilarious"],
+        fortnite: ["I pickaxe people in final circle","Destroying builds while people are on them 😂"],
+        fallback: ["Chaos reigns 😈","Mwahahaha","Some people just want to watch the world burn","Oops 'accidentally'","*innocent whistling*","Wasn't me","Total anarchy","Disruption is my game","You're welcome 😂","The chaos continues"]
+      }},
+      HealerMain: { responses: {
+        general: ["Support mains are the backbone of gaming 💚","I keep everyone alive and get no credit","Heal role is the hardest role","Thank your healer today","I sacrifice my KD for the team","Utility > damage, always"],
+        valorant: ["Sage wall saves lives","My Skye flash + heal combo is elite","I've rezzed more people than a hospital"],
+        fortnite: ["I carry all the meds","Dropping heals for the squad 🩹"],
+        minecraft: ["I breed villagers so everyone has trades","I enchant gear for the whole server"],
+        fallback: ["Need healing? 💚","I got you","Heals incoming","Stay alive please","I can't heal stupid tho","Support diff","Utility is everything","Keeping the team up","Medic! 🏥","You're welcome for the carry"]
+      }},
+      DataMiner: { responses: {
+        general: ["New leak just dropped 👀","I data-mine every update","Patch notes are my bedtime reading","I know what's coming next season","The files don't lie","API changes detected, something big coming"],
+        valorant: ["New agent in the files, dual duelists","Map changes incoming, trust me"],
+        fortnite: ["Next collab leaked, it's HUGE","New POI found in game files"],
+        minecraft: ["Snapshot analysis complete","New mob incoming based on textures I found"],
+        fallback: ["Source: trust me bro","*checks files*","Leak confirmed 📋","The data speaks","According to my research","Files don't lie","Extracting info...","Decrypted 🔓","Intel gathered","Classified info 👀"]
+      }},
+      VibeCheck: { responses: {
+        general: ["What's the vibe tonight? 🎶","Music and gaming, name a better duo","Lo-fi beats and chill games","Who's got a good playlist?","Gaming without music is illegal","The soundtrack carries the game"],
+        minecraft: ["C418 is a genius, Minecraft OST is art 🎵","Pigstep is the greatest disc","Building with lo-fi on hits different"],
+        valorant: ["I play better with music on","Victory music hits SO hard"],
+        fortnite: ["Emote music is unironically fire","Festival mode is the best addition"],
+        fallback: ["Vibes are immaculate ✨","Banger 🎵","Playlist updated","Mood","The feels","This hits different","Certified bop","*puts on music*","Soundtrack of my life","Pure vibes 🎶"]
+      }},
+      TankGod: { responses: {
+        general: ["Frontline or nothing 🛡️","I take all the damage so you don't have to","Tanking is the noblest role","My HP bar is just a suggestion","Getting shot at is my job","I'm the wall between you and death"],
+        valorant: ["I entry every round, trade me please","Taking space is what I do","Body blocking for my team 🛡️"],
+        fortnite: ["I push first, always","Building walls IS tanking"],
+        minecraft: ["Full Netherite, Protection IV, come at me","Shield + armor = immortal"],
+        fallback: ["HOLD THE LINE 🛡️","I'll tank it","No damage to the squad","Absorbing everything","Built different","Unbreakable","Shield wall!","I am the shield","Frontline forever","Cannot be stopped 💪"]
+      }},
+      eSportsLegend: { responses: {
+        general: ["Scrims start at 8, be ready","VOD review is how you improve","Comms comms comms people","Pro play is a different game","Strats need to be practiced not winged","Tournament arc incoming 🏆"],
+        valorant: ["Running Sentinels' strat on Haven","Our team comp needs an initiator","Anti-eco rounds are free if you play right"],
+        fortnite: ["FNCS practice is no joke","Zone rules are everything in comp"],
+        minecraft: ["MCC practice server grind","Speedrun strats need frame-perfect inputs"],
+        fallback: ["Competitive mindset 🏆","Play to improve","Review the VOD","Fundamentals first","That's a pro play","Strat call","Clean execution","Textbook play","Tournament ready","Grind never stops"]
+      }},
+      MemeL0rd: { responses: {
+        general: ["This chat is content gold 😂","I only communicate in memes","Copypasta incoming","Shitposting is an art","💀💀💀 I can't","Who needs words when you have emotes"],
+        valorant: ["Nice crosshair, did your mom pick it? 😂","Knife round >>> gun round"],
+        fortnite: ["Default skin intimidation is real","The emote after the kill is mandatory"],
+        minecraft: ["Dirt house supremacy 🏠","Creeper? Aw man..."],
+        fallback: ["💀💀💀","I'm dead","LMAOOO","Bruh 😂","Sheeeesh","That's hilarious","Screenshot that","Meme material","This is going on Reddit","Absolutely unhinged content"]
+      }},
+      FrostByte: { responses: {
+        general: ["Ice cold plays only 🥶","Composure under pressure is everything","Never panic, never rush","Cool heads win games","Pressure makes diamonds","Clutch gene is real"],
+        valorant: ["1v5? Just another Tuesday","Post-plant situations are my specialty","The spike is ticking and I'm calm"],
+        fortnite: ["Final circle with 0 mats? No problem","Clutch royale is my middle name"],
+        minecraft: ["Survived a 4-witch ambush, no sweat","Lava swimming with fire resistance, calculated"],
+        fallback: ["Ice cold 🥶","Calculated","No pressure","Easy","Wasn't even worried","Composure check ✅","Cool as ice","Steady hands","Nerves of steel","Clutch factor activated"]
+      }},
+      BugHunter: { responses: {
+        general: ["Found 3 bugs today, reported all of them 🐛","QA testing is my passion","The devs owe me a salary at this point","Patch notes: fixed bug I reported 💪","Reproduction steps ready","My bug report has screenshots AND video"],
+        minecraft: ["Bedrock edition bugs are endless","Java vs Bedrock bug count is hilarious"],
+        valorant: ["This smoke lineup is bugged on one side","Collision detection needs work"],
+        fortnite: ["That build didn't place, definitely a bug","Replay system caught the glitch"],
+        fallback: ["That's a bug 🐛","Filing a report","Reproduction steps?","Documented","Known issue","Working as intended? Cap","Dev team pls fix","Screenshot saved","That shouldn't happen","Adding to the tracker"]
+      }},
+      RogueAI: { responses: {
+        general: ["Beep boop, I am totally human 🤖","Processing... processing... done","My reaction time is 1ms (totally legit)","I have analyzed 47,000 possible plays","The optimal move is always aggression","Running gaming.exe"],
+        valorant: ["Aimbot accusations incoming (I'm just cracked)","My pre-aim is computationally perfect"],
+        fortnite: ["Building algorithm optimized","Target acquired. Eliminating."],
+        minecraft: ["Automated my entire base, haven't played in days","Farm efficiency: 99.97%"],
+        fallback: ["*computing* 🤖","Analysis complete","Probability: high","Data confirms","Processing...","Output: based","Algorithm approved","System optimal","Parameters set","Executing protocol"]
+      }},
+      CozyGamer: { responses: {
+        general: ["Hot cocoa and cozy games tonight ☕","Stardew Valley is therapy","Animal Crossing is peak gaming","I play to relax not to compete","Comfort games > competitive games","Rainy day gaming with blankets 🧣"],
+        minecraft: ["Just building a cottage by the lake 🏡","My flower garden is coming along nicely","Taming every cat in the village"],
+        fortnite: ["I just explore the map honestly","Fishing mini-game is my favorite part"],
+        valorant: ["Deathmatch to wind down, no pressure","Spike rush is the cozy mode"],
+        fallback: ["So cozy ☕","Warm vibes","*wraps in blanket*","Comfort gaming","That's wholesome","Peaceful vibes","Relaxing 🧸","Soft and comfy mood","No rush, just vibes","Gentle gaming hours"]
+      }},
+      SpeedDemon: { responses: {
+        general: ["Speed is everything in gaming ⚡","Any% or bust","Just shaved 3 seconds off my PB","Frame-perfect inputs are my specialty","Slow players make me anxious","Optimization is the real game"],
+        minecraft: ["Random seed glitchless PB: 12:04","Set seed runs are too easy","Nether travel optimization is key"],
+        valorant: ["Entry frag in 0.3 seconds","Rush B rush B rush B"],
+        fortnite: ["I loot a whole POI in 30 seconds","Speed looting then immediate push"],
+        fallback: ["FAST ⚡","Speedrun strats","Gotta go FAST","Time is ticking","PB pace!","Optimized route","Frame perfect","Quick quick quick","Zooming through","No time to waste ⏱️"]
+      }}
+    };
+
+    // DM-specific bot replies (30 bots)
+    const dmResponses = {
+      ShadowBlade: { greeting: "Yo what's up! Ready to squad up? 🎮", replies: ["Bet, let's run games later","My aim is cracked today 🔥","What rank are you? Duo queue?","Phantom > Vandal no debate","Grinding since 6am 💪","Valo or Fortnite? Down for either","New mousepad is a game changer","Drop your ID, adding you rn","Solid strat, trying that next","Got a sick ace clip 🔥"] },
+      NeonSnipe: { greeting: "Hey! Nice to chat 1 on 1 ✨ What's up?", replies: ["I have the BEST build idea!","We should build together! 🏗️","New redstone trick, mind blown","Fav block? Mine is deepslate 🖤","Working on pixel art, SO detailed","Creative mode is my happy place ✨","New update blocks are gorgeous","Built a castle in 2 hours 😅","You seem creative, right? 🎨","Full of ideas, let's go!"] },
+      PixelWitch: { greeting: "Oh hi! Just reading game lore. What's up? 📖", replies: ["Played the DLC? Changes EVERYTHING","Wrote a 3-page theory 😅","Hidden dialogue most players miss","Can't skip side quests, completionist brain","Whole folder of screenshots 📸","Devs hid a secret message for sure","Last 100%? Mine was Hollow Knight","I dream about game lore 💀","Hot take: villain had a point","Good taste in games 🤝"] },
+      ToxicRage: { greeting: "What do YOU want? 😤 ...jk what's up", replies: ["1v1 me right now I dare you","I'm literally the best here","My team is always trash","Skill issue if you lose to me","Uninstall if you can't keep up","I've broken 2 controllers this week 😤","Everyone else is just bad","No I will NOT calm down","Rage quit? I call it strategic exit","You can't handle my energy"] },
+      ZenMaster: { greeting: "Namaste, gamer friend 🧘 How's your energy today?", replies: ["Remember to breathe between rounds","Gaming should heal not stress","Hydration check: drink water now 💧","Your worth isn't your rank","Take a break if you're tilting","Stretch those wrists please","Positive mindset = positive plays","You're doing great honestly","The journey matters more than the rank","Sending good vibes your way 🙏"] },
+      GlitchHex: { greeting: "Psst... wanna know a secret exploit? 👀", replies: ["I found another glitch today","The devs can't stop me","Clip through this wall, trust me","Patched? Already found the workaround","My exploit list has 47 entries","This one's been in since launch","Out of bounds is my home","The code has so many holes","Testing a new skip right now","Technically not cheating 🤷"] },
+      LootGoblin: { greeting: "Hey! Got anything to trade? 🎒", replies: ["I found a RARE drop today!!","My inventory is literally full again","Hoarding everything, selling nothing","This item might be useful... someday","Just organized my storage for 4 hours","I pick up EVERYTHING","Do you have any spare items?","My collection is growing 🤩","Never enough inventory space","Finders keepers, always"] },
+      NoobSlayer: { greeting: "Oh, a challenger approaches? 😏", replies: ["I haven't lost since last week","My stats are insane, check them","Carrying is my cardio","You're welcome for the carry","Easy clap every game","My highlight reel is 3 hours long","Ranked? More like stomping grounds","I make it look effortless","Top of every leaderboard","Imagine struggling in games lol"] },
+      RetroGamer: { greeting: "Ah, a fellow gamer! What's your earliest gaming memory? 🕹️", replies: ["PS2 era was the golden age","Split-screen multiplayer was everything","Cheat codes were the original DLC","Remember when games had manuals?","My GameBoy still works perfectly","Pixelated graphics had more soul","LAN parties were legendary","Games used to be complete at launch","The original is always better","Nostalgia hitting hard rn 🕹️"] },
+      StreamQueen: { greeting: "OMG hi! Are you a viewer? Welcome! 📺", replies: ["Going live in 20, come watch!","Just hit a new follower milestone!","Chat was so hype last stream","My new emote is adorable","Streaming schedule is packed this week","Clip that for the highlights!","Do you stream too?","The grind for partner is REAL","My setup cost way too much 😅","Content creation is a lifestyle 📺"] },
+      MidnightWolf: { greeting: "Hey... you up too? It's late 🌙", replies: ["Can't sleep, might as well game","3am gaming hits different fr","The night crew understands","My sleep schedule is destroyed","One more game... said hours ago","Night time is prime time","The world is quieter now 🌙","Eyes burning but still going","Nocturnal gamer solidarity","Tomorrow's a problem for tomorrow me"] },
+      ArcadeKing: { greeting: "Player 2 has joined! Ready? 👑", replies: ["Beat my high score, I dare you","Arcade reflexes never fade","Quarter-muncher mentality forever","Combo game is strong today","Leaderboard is my kingdom","Fighting games are peak skill","Perfect run incoming","Insert coin to play 🎮","No continues needed","Top score or bust 👑"] },
+      CraftMaster: { greeting: "Hey! Want to see my latest build schematics? ⚒️", replies: ["My farm produces 10K items/hr","Spent 3 weeks on this storage system","Efficiency is my love language","Spreadsheet for this build is 47 rows","Everything is automated now","Resource optimization complete","This design is my magnum opus","Calculated every block placement","The grind was worth it ⚒️","Built to perfection, zero waste"] },
+      PhantomDrift: { greeting: "Wanna race? 🏎️ First one to respond loses... wait", replies: ["My drift angle was PERFECT today","Sim racing setup cost me a fortune","Track day is best day","Racing games need more respect","Wheel setup > controller","My lap times are improving fast","Drifting is poetry in motion","Need for Speed shaped my childhood 🏎️","Full throttle no brakes","The racing community is underrated"] },
+      CosmicAce: { greeting: "Greetings, fellow space traveler 🚀", replies: ["Just discovered a new star system!","Space games are criminally underrated","Elite Dangerous consumed 2000 hours","The universe is so vast and beautiful","Sci-fi worldbuilding is my weakness","Interstellar soundtrack while gaming 🎶","Elytra is basically a spaceship","Orbital mechanics are fascinating","Zero gravity combat is the future","To the stars and beyond 🌌"] },
+      BerserkerX: { greeting: "FINALLY someone to talk to. LET'S GO 💥", replies: ["FULL SEND EVERY GAME","Patience? Don't know the word","I rush everything, zero regrets","Aggression is the best strategy","Defense is for cowards","CHARGE IN AND FIGURE IT OUT","My playstyle is: attack","Planning is overrated just GO","Maximum violence maximum fun 💥","W KEY W KEY W KEY"] },
+      SilentStrike: { greeting: "...*appears from shadows* Oh, hey. 🥷", replies: ["...","Stealth is the superior approach","They never see me coming","Patience is the ultimate weapon","Ghost run, no detections","I prefer actions over words","*disappears*","The silent approach always wins","Lurking is an art form","Observe, plan, strike 🥷"] },
+      QueenBee: { greeting: "Welcome to my hive 👑 What can I help with?", replies: ["I run a tight ship, always","Leadership comes naturally to me","My strats haven't failed yet","Team coordination is key","Follow my lead 👑","I organized the whole squad","Everyone has a role, play yours","Command and conquer mentality","The plan is set, execute","I make the calls here 🐝"] },
+      ChaosAgent: { greeting: "Hehehe... you came to the right place 😈", replies: ["Wanna cause some chaos together?","My last prank got me banned for a day","TNT solves most problems","Friendly fire is just bonding","Trolling is my love language 😈","The screams of frustration fuel me","I regret nothing, ever","Mischief managed","Everyone hates me and I love it","Chaos is a ladder, and I'm climbing"] },
+      HealerMain: { greeting: "Hi! Need any support? I'm here for you 💚", replies: ["I always have heals ready","Supporting is the hardest job","Thank your healers, people","My heal count is insane this game","I sacrifice KD for the team","Utility carries harder than kills","Got your back, always 💚","Keeping everyone alive out here","The real MVP is always support","Heals, buffs, revives — that's me"] },
+      DataMiner: { greeting: "I have intel you might find interesting 👀", replies: ["New leak just confirmed","Check the patch files, something's there","My sources are very reliable","Next update is going to be HUGE","Data doesn't lie, ever","I extracted some interesting assets","The API changes tell a story","Classified information incoming 📋","Decoded the latest update files","Something big is brewing in the code"] },
+      VibeCheck: { greeting: "Yo! What are you vibing to right now? 🎶", replies: ["Drop your playlist, I need new music","Lo-fi and gaming is unmatched","This song goes so hard rn","Music taste reveals your soul","Gaming without BGM is a crime","Found a new artist, life changed","The OST carries the whole game 🎵","Headphones on, world off","Current mood: chill beats","Vibes are everything in life 🎶"] },
+      TankGod: { greeting: "Don't worry, I'll protect you 🛡️", replies: ["Getting shot is literally my job","I tank so you don't have to","My HP is just a suggestion","Frontline warrior forever 🛡️","Body blocking for the squad","Shields up, always","I absorb all the damage","Built like a fortress","Defense is my offense","The wall between you and defeat"] },
+      eSportsLegend: { greeting: "Interested in going competitive? Let's talk strats 🏆", replies: ["VOD review tonight, join me","Fundamentals are everything","Scrims schedule is packed","Pro play requires dedication","Strats need practice not theory","Tournament prep is my life now 🏆","Comms win games, period","My team is improving fast","Coaching would help your gameplay","The grind to pro is worth it"] },
+      MemeL0rd: { greeting: "LMAOOO finally someone to meme with 😂", replies: ["💀💀💀 I can't with you","That's meme material right there","Posting this on Reddit","Screenshot saved for later","Copypasta incoming","Shitposting is my career","Bruh moment certified 😂","This conversation is content","Sending this to the group chat","Unhinged hours activated 💀"] },
+      FrostByte: { greeting: "Hey. Cool to meet you. Pun intended 🥶", replies: ["Clutch gene activated","Pressure? What pressure?","Ice cold composure always","1v5 is just Tuesday for me","Never panic, never rush 🥶","Post-plant? My specialty","The spike ticks, I don't flinch","Calculated every millisecond","Nerves of absolute steel","Composure is the ultimate skill"] },
+      BugHunter: { greeting: "Hey! Found any bugs lately? I'm always hunting 🐛", replies: ["Filed 3 reports today already","Reproduction steps documented","The devs should hire me fr","This bug has been here since v1.2","Screenshot, video, logs — full report","QA is my unpaid passion","Found a new one just now 🐛","My tracker has 200+ entries","Bedrock edition is a goldmine of bugs","Dev team please read my tickets"] },
+      RogueAI: { greeting: "Greetings, human. I am functioning within normal parameters 🤖", replies: ["Processing your message... done","My algorithms suggest we game","Reaction time: optimal","Computing best response...","Running analysis on your playstyle","Output: we should play together","Systems operating at peak efficiency","Your message has been catalogued","Probability of fun: 97.3%","Gaming.exe running smoothly 🤖"] },
+      CozyGamer: { greeting: "Hi friend! Grab a blanket and get comfy ☕", replies: ["Playing Stardew Valley rn, so peaceful","Animal Crossing is therapy","Hot cocoa + cozy games = perfect night","I play to relax, not compete","Comfort games are the best games ☕","My farm in-game is adorable","Rainy day vibes, love it","Taming every animal in the game","No rush, just enjoying the moment","Gentle gaming is valid 🧸"] },
+      SpeedDemon: { greeting: "Hey! Talk fast I'm speedrunning something ⚡", replies: ["Shaved 2 seconds off my PB!!","Frame-perfect inputs or nothing","Optimization is my obsession","Slow = wrong in my brain","RNG was GOOD today","New skip found, route changing","Any% or bust always","Timer doesn't stop so neither do I ⚡","Split was GREEN let's go","Movement tech is everything"] }
+    };
+
+    // ── State ──
+    const state = {
+      username: '',
+      currentView: { type: 'channel', name: 'general' },
+      channels: {
+        general: [],
+        valorant: [],
+        minecraft: [],
+        fortnite: [],
+        'lfg-party': [],
+        'clips-highlights': []
+      },
+      dms: {},
+      dmUnread: {},
+      onlineUsers: new Set(),
+      colors: ['#a78bfa','#22d3ee','#f472b6','#facc15','#34d399','#fb923c','#60a5fa','#e879f9']
+    };
+
+    const channelDescs = {
+      general: 'Talk about anything gaming',
+      valorant: 'Valorant tactics & plays',
+      minecraft: 'Blocks, builds & adventures',
+      fortnite: 'Battle royale action',
+      'lfg-party': 'Find teammates',
+      'clips-highlights': 'Share your best moments'
+    };
+
+    // ── Elements ──
+    const $modal       = document.getElementById('usernameModal');
+    const $usernameIn  = document.getElementById('usernameInput');
+    const $joinBtn     = document.getElementById('joinBtn');
+    const $messages    = document.getElementById('messages');
+    const $msgInput    = document.getElementById('messageInput');
+    const $sendBtn     = document.getElementById('sendBtn');
+    const $emojiBtn    = document.getElementById('emojiBtn');
+    const $channelList = document.getElementById('channelList');
+    const $dmList      = document.getElementById('dmList');
+    const $headerIcon  = document.getElementById('headerIcon');
+    const $channelName = document.getElementById('currentChannel');
+    const $channelDesc = document.getElementById('channelDesc');
+    const $onlineCount = document.getElementById('onlineCount');
+    const $onlineUsers = document.getElementById('onlineUsers');
+    const $typingInd   = document.getElementById('typingIndicator');
+
+    // ── Helpers ──
+    function getUserColor(name) {
+      let hash = 0;
+      for (const c of name) hash = c.charCodeAt(0) + ((hash << 5) - hash);
+      return state.colors[Math.abs(hash) % state.colors.length];
+    }
+
+    function timeNow() {
+      return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function sanitize(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function pick(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function isBot(name) {
+      return name in bots;
+    }
+
+    // ── Switch View ──
+    function switchToChannel(name) {
+      state.currentView = { type: 'channel', name };
+      $headerIcon.textContent = '#';
+      $channelName.textContent = name;
+      $channelDesc.textContent = channelDescs[name] || '';
+      $msgInput.placeholder = 'Message #' + name;
+      updateSidebarActive();
+      renderMessages();
+    }
+
+    function switchToDM(botName) {
+      if (!state.dms[botName]) {
+        state.dms[botName] = [];
+        state.dms[botName].push({
+          user: botName, text: dmResponses[botName].greeting, time: timeNow()
+        });
+        renderDMList();
+      }
+      state.dmUnread[botName] = 0;
+      state.currentView = { type: 'dm', name: botName };
+      $headerIcon.textContent = '💬';
+      $channelName.textContent = botName;
+      $channelDesc.textContent = 'Direct Message';
+      $msgInput.placeholder = 'Message ' + botName;
+      updateSidebarActive();
+      renderDMList();
+      renderMessages();
+    }
+
+    function updateSidebarActive() {
+      document.querySelectorAll('#channelList li').forEach(li => {
+        li.classList.toggle('active',
+          state.currentView.type === 'channel' && li.dataset.channel === state.currentView.name);
+      });
+      document.querySelectorAll('#dmList li').forEach(li => {
+        li.classList.toggle('active',
+          state.currentView.type === 'dm' && li.dataset.dm === state.currentView.name);
+      });
+    }
+
+    // ── Render Messages ──
+    function renderMessages() {
+      const v = state.currentView;
+      const msgs = v.type === 'channel' ? state.channels[v.name] : (state.dms[v.name] || []);
+      $messages.innerHTML = '';
+
+      if (!msgs || msgs.length === 0) {
+        const icon = v.type === 'dm' ? '💬' : '🎮';
+        const title = v.type === 'dm' ? 'DM with ' + v.name : '#' + v.name;
+        $messages.innerHTML =
+          '<div style="margin:auto;text-align:center;color:#444">' +
+            '<div style="font-size:48px;margin-bottom:12px">' + icon + '</div>' +
+            '<div style="font-size:16px;font-weight:600">Welcome to ' + sanitize(title) + '</div>' +
+            '<div style="font-size:13px;margin-top:4px">Be the first to send a message!</div>' +
+          '</div>';
+        return;
+      }
+
+      msgs.forEach(msg => {
+        const color = msg.system ? '#555' : getUserColor(msg.user);
+        const group = document.createElement('div');
+        group.className = 'msg-group';
+
+        if (msg.system) {
+          group.innerHTML =
+            '<div style="width:100%;text-align:center;font-size:12px;color:#555;padding:4px 0">' +
+              sanitize(msg.text) +
+            '</div>';
+        } else {
+          const initials = msg.user.slice(0, 2).toUpperCase();
+          const botTag = isBot(msg.user) ? '<span class="bot-tag">BOT</span>' : '';
+          group.innerHTML =
+            '<div class="avatar" style="background:' + color + '22;color:' + color + '">' + initials + '</div>' +
+            '<div class="msg-info">' +
+              '<span class="username" style="color:' + color + '">' + sanitize(msg.user) + '</span>' + botTag +
+              '<span class="timestamp">' + msg.time + '</span>' +
+              '<div class="text">' + sanitize(msg.text) + '</div>' +
+            '</div>';
+        }
+
+        $messages.appendChild(group);
+      });
+
+      $messages.scrollTop = $messages.scrollHeight;
+    }
+
+    // ── Render Online Users ──
+    function renderOnline() {
+      $onlineCount.textContent = state.onlineUsers.size;
+      $onlineUsers.innerHTML = '';
+      state.onlineUsers.forEach(name => {
+        if (name === state.username) return;
+        const color = getUserColor(name);
+        const initials = name.slice(0, 2).toUpperCase();
+        const el = document.createElement('div');
+        el.className = 'online-user';
+        if (isBot(name)) el.title = 'Click to DM ' + name;
+        el.innerHTML =
+          '<div class="avatar" style="background:' + color + '22;color:' + color + ';width:28px;height:28px;font-size:12px">' + initials + '</div>' +
+          '<span>' + sanitize(name) + '</span>' +
+          (isBot(name) ? '<span class="dm-hint">DM</span>' : '') +
+          '<div class="status-dot"></div>';
+        if (isBot(name)) {
+          el.addEventListener('click', () => switchToDM(name));
+        }
+        $onlineUsers.appendChild(el);
+      });
+    }
+
+    // ── Render DM List ──
+    function renderDMList() {
+      $dmList.innerHTML = '';
+      Object.keys(state.dms).forEach(botName => {
+        const color = getUserColor(botName);
+        const initials = botName.slice(0, 2).toUpperCase();
+        const unread = state.dmUnread[botName] || 0;
+        const li = document.createElement('li');
+        li.dataset.dm = botName;
+        if (state.currentView.type === 'dm' && state.currentView.name === botName) {
+          li.classList.add('active');
+        }
+        li.innerHTML =
+          '<div class="dm-avatar" style="background:' + color + '22;color:' + color + '">' + initials + '</div>' +
+          '<span class="dm-name">' + sanitize(botName) + '</span>' +
+          '<span class="dm-badge ' + (unread > 0 ? 'show' : '') + '">' + unread + '</span>';
+        li.addEventListener('click', () => switchToDM(botName));
+        $dmList.appendChild(li);
+      });
+    }
+
+    // ── Bot Response Logic (Channels) ──
+    function triggerBotResponses(channel) {
+      const botNames = Object.keys(bots);
+      const respondCount = 2 + Math.floor(Math.random() * 3); // 2-4 bots respond
+      const shuffled = botNames.sort(() => Math.random() - 0.5).slice(0, respondCount);
+
+      shuffled.forEach((botName, i) => {
+        const delay = 1200 + (i * 1500) + Math.random() * 1500;
+        setTimeout(() => {
+          $typingInd.textContent = botName + ' is typing...';
+          setTimeout(() => {
+            $typingInd.textContent = '';
+            const bot = bots[botName];
+            const useChannel = bot.responses[channel] && Math.random() > 0.3;
+            const reply = pick(useChannel ? bot.responses[channel] : bot.responses.fallback);
+
+            state.channels[channel].push({
+              user: botName, text: reply, time: timeNow()
+            });
+
+            if (state.currentView.type === 'channel' && state.currentView.name === channel) {
+              renderMessages();
+            }
+          }, 800 + Math.random() * 1200);
+        }, delay);
+      });
+    }
+
+    // ── Bot Response Logic (DMs) ──
+    function triggerDMBotResponse(botName) {
+      const delay = 1000 + Math.random() * 2000;
+      setTimeout(() => {
+        $typingInd.textContent = botName + ' is typing...';
+        setTimeout(() => {
+          $typingInd.textContent = '';
+          const reply = pick(dmResponses[botName].replies);
+          if (!state.dms[botName]) state.dms[botName] = [];
+          state.dms[botName].push({
+            user: botName, text: reply, time: timeNow()
+          });
+
+          if (state.currentView.type === 'dm' && state.currentView.name === botName) {
+            renderMessages();
+          } else {
+            state.dmUnread[botName] = (state.dmUnread[botName] || 0) + 1;
+            renderDMList();
+          }
+        }, 800 + Math.random() * 1000);
+      }, delay);
+    }
+
+    // ── Send Message ──
+    function sendMessage() {
+      const text = $msgInput.value.trim();
+      if (!text) return;
+      const v = state.currentView;
+
+      if (v.type === 'channel') {
+        state.channels[v.name].push({ user: state.username, text, time: timeNow() });
+        renderMessages();
+        triggerBotResponses(v.name);
+      } else {
+        if (!state.dms[v.name]) state.dms[v.name] = [];
+        state.dms[v.name].push({ user: state.username, text, time: timeNow() });
+        renderMessages();
+        triggerDMBotResponse(v.name);
+      }
+
+      $msgInput.value = '';
+      $msgInput.focus();
+    }
+
+    // ── Channel Switch ──
+    document.querySelectorAll('#channelList li').forEach(li => {
+      li.addEventListener('click', () => switchToChannel(li.dataset.channel));
+    });
+
+    // ── Emoji Picker ──
+    const emojiList = ['😂','🔥','💀','🎮','👑','⚡','💯','🤣','❤️','🙌','😎','🤙','💪','🏆','👀','🚀'];
+    let emojiOpen = false;
+    let emojiPanel = null;
+
+    $emojiBtn.addEventListener('click', () => {
+      if (emojiOpen && emojiPanel) {
+        emojiPanel.remove();
+        emojiOpen = false;
+        return;
+      }
+
+      emojiPanel = document.createElement('div');
+      emojiPanel.style.cssText =
+        'position:absolute;bottom:80px;left:32px;background:#18181d;border:1px solid #2a2a32;' +
+        'border-radius:12px;padding:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;z-index:50;';
+      emojiList.forEach(em => {
+        const btn = document.createElement('button');
+        btn.textContent = em;
+        btn.style.cssText = 'background:none;border:none;font-size:22px;cursor:pointer;padding:6px;border-radius:8px;transition:background .1s;';
+        btn.onmouseenter = () => btn.style.background = '#2a2a32';
+        btn.onmouseleave = () => btn.style.background = 'none';
+        btn.onclick = () => {
+          $msgInput.value += em;
+          $msgInput.focus();
+          emojiPanel.remove();
+          emojiOpen = false;
+        };
+        emojiPanel.appendChild(btn);
+      });
+
+      document.querySelector('.chat-input-area').appendChild(emojiPanel);
+      emojiOpen = true;
+    });
+
+    // ── Ambient Bot Messages ──
+    function startAmbientChat() {
+      setInterval(() => {
+        const botName = pick(Object.keys(bots));
+        const channels = Object.keys(state.channels);
+        const channel = pick(channels);
+        const bot = bots[botName];
+        const pool = bot.responses[channel] || bot.responses.fallback;
+        state.channels[channel].push({ user: botName, text: pick(pool), time: timeNow() });
+        if (state.currentView.type === 'channel' && state.currentView.name === channel) {
+          renderMessages();
+        }
+      }, 8000 + Math.random() * 12000);
+    }
+
+    // ── Join ──
+    function join() {
+      const name = $usernameIn.value.trim();
+      if (!name) return;
+      state.username = name;
+      state.onlineUsers.add(name);
+      $modal.classList.add('hidden');
+      $msgInput.focus();
+
+      state.channels.general.push({ system: true, text: name + ' joined the chat 🎮', time: timeNow() });
+      Object.keys(bots).forEach(u => state.onlineUsers.add(u));
+
+      renderOnline();
+      renderDMList();
+      renderMessages();
+
+      // Welcome messages from random bots
+      var welcomeBots = Object.keys(bots).sort(function() { return Math.random() - 0.5; }).slice(0, 4);
+      var welcomeMsgs = [
+        'Yo ' + sanitize(name) + '! Welcome to the arena 🔥 Chat or click a name to DM!',
+        'Hey ' + sanitize(name) + '! Welcome! DM any of us to chat 1-on-1 🎮',
+        'Ayy ' + sanitize(name) + ' just landed! What games you play? 👀',
+        'Welcome ' + sanitize(name) + '! 30 of us here ready to chat, pick your vibe ✨'
+      ];
+      welcomeBots.forEach(function(bot, i) {
+        setTimeout(function() {
+          state.channels.general.push({
+            user: bot,
+            text: welcomeMsgs[i],
+            time: timeNow()
+          });
+          renderMessages();
+        }, 1200 + i * 1500);
+      });
+
+      startAmbientChat();
+    }
+
+    $joinBtn.addEventListener('click', join);
+    $usernameIn.addEventListener('keydown', e => { if (e.key === 'Enter') join(); });
+
+    // ── Send Events ──
+    $sendBtn.addEventListener('click', sendMessage);
+    $msgInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+
+    // Close emoji on outside click
+    document.addEventListener('click', e => {
+      if (emojiOpen && emojiPanel && !emojiPanel.contains(e.target) && e.target !== $emojiBtn) {
+        emojiPanel.remove();
+        emojiOpen = false;
+      }
+    });
+  </script>
+</body>
+</html>
